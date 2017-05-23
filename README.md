@@ -5,3 +5,8 @@
 | :-------- |
 | Kmeans  |
 | GBDT     |
+| Random Forest     |
+
+
+
+
