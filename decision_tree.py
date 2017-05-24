@@ -12,7 +12,7 @@ class DecisionTree(object):
         self.max_depth = max_depth
         self._compute_leaf_value = None
         self._compute_node_impurity=None
-        self.feature_is = None
+        self.feature_is = feature_is
 
     def fit(self, X, y):
         if self.feature_is is None:
@@ -68,7 +68,6 @@ class DecisionTree(object):
 
 class Node(object):
     """结点
-
        leaf_value ： 记录叶子结点值
        feature_i ：特征i
        feature_i_v ： 特征i的值
@@ -142,3 +141,38 @@ class RegressionTree(DecisionTree):
         self._compute_node_impurity = self._node_mse
         self._compute_leaf_value = self._mean
         super(RegressionTree, self).fit(X, y)
+
+
+class XGBoostRegressionTree(DecisionTree):
+    """XGBoost回归树
+    """
+
+    def __init__(self, min_samples_split=2, max_depth=10, feature_is=None, reg_lambda=0.1, loss=None):
+        DecisionTree.__init__(self, min_samples_split=min_samples_split, max_depth=max_depth, feature_is=feature_is)
+        self.reg_lambda = reg_lambda
+        self.loss = loss
+
+    #xgboost paper中定义的增益
+    def _compute_gain(self, yy, yy1, yy2):
+        gain = 0.5 * (self._Gn_by_H(yy1, 2) + self._Gn_by_H(yy2, 2) - self._Gn_by_H(yy, 2))
+        return -gain
+
+    #计算G^2/H+lamda 或者 G/H+lamda
+    def _Gn_by_H(self, yy, n=1):
+        y, y_pred = self._separate(yy)
+        G = np.sum(self.loss.grad(y, y_pred))
+        H = np.sum(self.loss.hess(y, y_pred))
+        return G ** n / (H + self.reg_lambda)
+
+    #xgboost paper中叶子结点的权重计算
+    def _compute_weight(self, yy):
+        return -self._Gn_by_H(yy)
+
+    def _separate(self, yy):
+        mid = np.shape(yy)[1] // 2
+        return yy[:, :mid], yy[:, mid:]
+
+    def fit(self, X, yy):
+        self._compute_node_impurity = self._compute_gain
+        self._compute_leaf_value = self._compute_weight
+        super(XGBoostRegressionTree, self).fit(X, yy)
