@@ -3,15 +3,7 @@
 from __future__ import division
 import numpy as np
 from decision_tree import RegressionTree
-
-class LeastSquaresLoss(object):
-
-    def __init__(self):
-        pass
-
-    #计算ls残差
-    def grad(self, y, y_pred):
-        return -1 * (y - y_pred)
+from util.loss import LeastSquaresLoss
 
 class GradientBoosting(object):
 
@@ -63,20 +55,19 @@ class GradientBoosting(object):
         self.y_shape = np.shape(y)
         y_pred = np.zeros(self.y_shape)
         for i in range(self.n_estimators):
-            #残差
-            residual = self.loss.grad(y, y_pred)
+            residual = -self.loss.grad(y, y_pred)
             tree = RegressionTree(
                 min_samples_split=self.min_samples_split,
                 max_depth=self.max_depth)
             #拟合残差
             tree.fit(X, residual)
-            y_pred -= self.learning_rate * tree.predict(X)
+            y_pred += self.learning_rate * tree.predict(X)
             #本轮stage完毕
             self.trees.append(tree)
 
     def predict(self, X):
         y_pred = np.zeros(self.y_shape)
         for i in range(self.n_estimators):
-            y_pred -= self.learning_rate * self.trees[i].predict(X)
+            y_pred += self.learning_rate * self.trees[i].predict(X)
 
         return y_pred
