@@ -6,7 +6,7 @@
 | Kmeans  |
 | GBDT     |
 | Random Forest     |
-
+| xgboost     |
 
 
 
