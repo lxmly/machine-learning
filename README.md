@@ -7,5 +7,6 @@
 | GBDT     |
 | Random Forest     |
 | XGBoost     |
+| Decision Tree     |
 
 
