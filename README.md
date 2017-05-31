@@ -8,5 +8,4 @@
 | Random Forest     |
 | XGBoost     |
 | Decision Tree     |
-
-
+| LR     |
