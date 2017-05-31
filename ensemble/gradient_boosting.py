@@ -5,6 +5,7 @@ import numpy as np
 from decision_tree import RegressionTree
 from util.loss import LeastSquaresLoss
 
+
 class GradientBoosting(object):
 
     """梯度提升决策树
